@@ -1,99 +1,113 @@
-# laboratorio-pedidos — proyecto de práctica
+# laboratorio-pedidos
 
-Sistema de gestión de pedidos de un laboratorio de análisis clínicos.
-**PHP Vanilla, sin frameworks, sin Composer.** Corre en XAMPP tal cual está.
+Sistema didáctico de pedidos de laboratorio, PHP nativo, MySQL y XAMPP. La versión corrige los ejercicios de diseño, conserva las funcionalidades de demostración y agrega pruebas automáticas simples.
 
-> ⚠️ **Este proyecto está roto a propósito.**
-> Cada archivo contiene deuda técnica sembrada, marcada con comentarios:
->
-> ```php
-> // ❌ MAL APLICADO: qué método está mal y qué principio viola
-> // ✅ FORMA CORRECTA: qué patrón corresponde y cómo se estructura
-> ```
->
-> El objetivo no es que funcione mejor: ya funciona. El objetivo es que
-> **se pueda cambiar sin miedo**.
+## Requisitos
 
----
+- Windows con XAMPP.
+- PHP 8.2 o superior.
+- Apache y MySQL iniciados desde el panel de XAMPP.
+- Extensión `pdo_mysql` habilitada en el PHP que utiliza Apache.
+- No necesita Composer ni paquetes externos.
 
-## Cómo levantarlo
+## 1. Instalar el proyecto
 
-1. Copiar la carpeta dentro de `C:\xampp\htdocs\`.
-2. Iniciar Apache desde el panel de XAMPP (MySQL **no** hace falta).
-3. Abrir: `http://localhost/mini-proyecto-laboratorio/public/index.php`
+1. Extraé esta carpeta en `C:\xampp\htdocs\mini-proyecto-laboratorio`.
+2. Iniciá **Apache** y **MySQL** desde XAMPP.
+3. Comprobá que `pdo_mysql` esté disponible. Podés abrir una consola y ejecutar:
+
+   ```bat
+   C:\xampp\php\php.exe -m | findstr /I "PDO pdo_mysql"
+   ```
+
+   Debe aparecer `PDO` y `pdo_mysql`. Si no aparece `pdo_mysql`, abrí el `php.ini` usado por XAMPP, habilitá la línea `extension=pdo_mysql` (quitá el `;` inicial si está comentada), guardá y reiniciá Apache.
+
+## 2. Crear la base de datos
+
+1. Abrí `http://localhost/phpmyadmin/`.
+2. Elegí **Importar** y seleccioná `database/schema.sql` del proyecto.
+3. Ejecutá la importación. El script crea la base `laboratorio` y la tabla `orders`.
+
+También podés ejecutar el contenido de `database/schema.sql` desde la consola de MySQL.
+
+## 3. Configurar MySQL
+
+Desde PowerShell, en la carpeta del proyecto:
+
+```powershell
+Copy-Item config\database.example.php config\database.php
+```
+
+Abrí `config/database.php` y completá los valores locales. Una configuración común para XAMPP es:
+
+```php
+return [
+    'driver' => 'mysql',
+    'host' => '127.0.0.1',
+    'port' => 3306,
+    'name' => 'laboratorio',
+    'user' => 'root',
+    'pass' => '',
+    'charset' => 'utf8mb4',
+];
+```
+
+Usá `pass => ''` solamente si tu usuario local `root` realmente no tiene contraseña. **No subas `config/database.php` a GitHub**: está excluido en `.gitignore`. El archivo de ejemplo conserva los valores vacíos para no publicar credenciales.
+
+## 4. Abrir la aplicación
+
+Con Apache y MySQL iniciados, ingresá a:
+
+```text
+http://localhost/mini-proyecto-laboratorio/public/index.php
+```
 
 Acciones disponibles:
 
-| URL | Qué hace |
+| Dirección | Resultado |
 |---|---|
-| `public/index.php?accion=crear` | Crea un pedido pasando por toda la deuda |
-| `public/index.php?accion=listar` | Lista pedidos desde la vista |
-| `public/index.php?accion=reporte` | Genera un reporte con banderas booleanas |
+| `?accion=listar` | Lista los pedidos guardados en MySQL. |
+| `?accion=crear` | Muestra el formulario de creación. Al enviarlo se valida, calcula, guarda y notifica. |
+| `?accion=reporte` | Genera un resumen con decoradores encadenados. |
 
-La persistencia está simulada en memoria para que el proyecto arranque sin
-configurar MySQL. Eso **no** es parte de la deuda a corregir.
+El formulario acepta paciente, importe base, tipo de paciente, canal de notificación y destino. Los mensajes de Email, SMS y WhatsApp se **simulan**; no se envían a servicios externos.
 
----
+## 5. Ejecutar pruebas automáticas
 
-## Mapa de deudas
+Desde la raíz del proyecto ejecutá:
 
-| Archivo | Síntoma sembrado | Patrón / principio | Ejercicio |
-|---|---|---|---|
-| `public/index.php` | Requires manuales, credenciales en el código, ruteo con `if` | Autoload + config externa + tabla de rutas | — |
-| `src/Database/Connection.php` | Una conexión nueva por consulta; excepción silenciada | **Singleton** | — |
-| `src/Notifications/NotificationSender.php` | `if` por tipo repetido en 3 archivos | **Factory** | Ej. 2 |
-| `src/Pricing/PriceCalculator.php` | `switch` con todos los algoritmos + lógica duplicada | **Strategy** | Ej. 1 |
-| `src/Events/OrderEvents.php` | Avisos encadenados a mano a clases concretas | **Observer** | Ej. 5 |
-| `src/Legacy/LegacyNotifier.php` | Clase de terceros modificada + copia y pega | **Adapter** | Ej. 3 |
-| `src/Reports/ReportGenerator.php` | Parámetros booleanos (`boolean trap`) | **Decorator** | Ej. 4 |
-| `src/Services/OrderService.php` | Método que hace de todo | **Facade** + SRP | Ej. 6 |
-| `src/Controllers/OrderController.php` | SQL + negocio + HTML en el controlador | **MVC** + SRP | Ej. 7 |
-| `src/Models/Order.php` | Modelo que se persiste y calcula precios | **Repository** + Strategy | — |
-| `views/orders.php` | Consulta, calcula y no escapa la salida | **MVC** | Ej. 8 |
-
----
-
-## La medida de la deuda de este proyecto
-
-El descuento de obra social (**0.7**) está escrito en **cinco archivos distintos**:
-
-```
-src/Models/Order.php
-src/Pricing/PriceCalculator.php   (dos veces)
-src/Services/OrderService.php
-src/Controllers/OrderController.php
-views/orders.php
+```bat
+C:\xampp\php\php.exe tests\run.php
 ```
 
-Cuando el laboratorio lo cambie al 25%, ese número es exactamente
-cuántos lugares hay que tocar y cuántas oportunidades hay de olvidarse uno.
+Estas pruebas no necesitan conectarse a MySQL: utilizan un repositorio falso para probar las reglas de precio, Factory, Adapter, Observer, Decorator y Facade. La aplicación web sí requiere la base configurada.
 
-**Ese es el punto de toda la unidad.**
+Para revisar sintaxis de todos los PHP:
 
----
-
-## Mecánica de la clase práctica
-
-```
-1. Cada grupo toma UN archivo del mapa de deudas.       (5 min)
-2. Lee los comentarios ❌ y ✅.                          (5 min)
-3. Refactoriza en una rama propia: feat/patron-<nombre>  (20 min)
-4. Abre un Pull Request que responda tres cosas:
-     - qué deuda encontró (con la línea exacta)
-     - qué patrón aplicó y por qué ese y no otro
-     - qué consecuencia negativa tiene su propia solución
-5. Otro grupo revisa el PR y comenta.                    (10 min)
+```powershell
+Get-ChildItem public,src,views,tests -Recurse -Filter *.php | ForEach-Object { C:\xampp\php\php.exe -l $_.FullName }
 ```
 
-El PR revisado por otro grupo es evidencia del TP Integrador.
+## 6. Patrones y correcciones
 
----
+- **Strategy:** cada política de precio es una clase independiente. `PriceCalculator` recibe un registro de estrategias; `PrepaidStrategy` se agrega en `ApplicationFactory` sin modificar la calculadora.
+- **Factory:** `NotificationFactory` crea Email, SMS o WhatsApp bajo el contrato `Notification`.
+- **Observer:** `OrderSubject` notifica a todos los objetos registrados que implementan `OrderObserver`. El sujeto no conoce las clases concretas.
+- **Adapter:** `LegacyNotifierAdapter` adapta `sendMessage()` al método `send()` sin modificar la clase heredada.
+- **Decorator:** los reportes se envuelven con decoradores encadenables. Ya no se usan banderas booleanas. Los agregados se representan como texto para el ejercicio.
+- **Facade:** `OrderService::procesarPedidoCompleto()` coordina validación, precio, persistencia, notificación y eventos delegando cada responsabilidad.
+- **MVC + SRP:** `OrderController` maneja la solicitud y delega; `Order` representa el pedido; las vistas muestran datos preparados y escapan las salidas.
+- **Singleton:** `Connection::getInstance()` administra una instancia de la conexión PDO por proceso de PHP.
+- **Repository:** `PdoOrderRepository` concentra consultas SQL preparadas y conversión entre filas de MySQL y objetos `Order`.
 
-## Reglas del refactor
+## 7. Git y entrega grupal
 
-- **No se rompe funcionalidad.** Antes y después, la app hace lo mismo.
-- **Un patrón por rama.** Nada de una rama con seis cambios mezclados.
-- **Se borra el código viejo.** Dejar el método anterior "por las dudas" es
-  deuda nueva.
-- **Se documenta la consecuencia negativa.** Un patrón sin contras analizadas
-  es sobreingeniería esperando su turno.
+El TP pide una rama y un Pull Request por patrón, revisión y aprobación por un integrante distinto del autor, historial real de commits y evidencia en `docs/DEUDA-TECNICA.md`.
+
+La plantilla `.github/pull_request_template.md` recuerda las tres preguntas obligatorias. El workflow `.github/workflows/php.yml` ejecuta sintaxis y pruebas en los Pull Requests.
+
+Antes de entregar, completá en `docs/MAPA-DE-DEUDAS.md` los integrantes y las URLs reales de los PR. No se deben inventar revisiones ni aprobaciones. El ZIP de fuentes no demuestra por sí solo que los PR hayan sido fusionados en `main`.
+
+## Nota sobre la configuración y alcance
+
+`config/database.php` es local y no se incluye en el proyecto entregable. La conexión no se simula: usa PDO/MySQL y fallará con un mensaje explicativo si faltan credenciales o `pdo_mysql`. Las funciones de comunicación y las opciones documentales se mantienen simuladas porque requieren proveedores o librerías externas que no forman parte de este TP.

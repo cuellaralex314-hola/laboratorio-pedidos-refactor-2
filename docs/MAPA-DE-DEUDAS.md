@@ -1,30 +1,22 @@
-# Mapa de deudas — laboratorio-pedidos
+# Mapa de deudas técnicas — laboratorio-pedidos
 
-Planilla de trabajo para la clase práctica. Cada grupo completa **una fila**
-durante la ronda de refactor y la usa como descripción de su Pull Request.
+Usar esta tabla para repartir el trabajo y registrar los PR reales. No completar autores, revisores ni enlaces hasta que existan en GitHub.
 
-| Archivo | Síntoma sembrado | Principio violado | Patrón que lo repara | Grupo | Rama | PR |
+| Archivo / método | Síntoma observado | Principio/deuda | Patrón o corrección | Rama sugerida | Integrante | PR real |
 |---|---|---|---|---|---|---|
-| `public/index.php` | Requires manuales, credenciales, ruteo con `if` | OCP + configuración en código | Autoload + tabla de rutas | | | |
-| `src/Database/Connection.php` | Conexión nueva por consulta, excepción silenciada | Gestión de recursos | Singleton | | | |
-| `src/Models/Order.php` | El modelo persiste y calcula precios | SRP | Repository + Strategy | | | |
-| `src/Pricing/PriceCalculator.php` | `switch` con todos los algoritmos, duplicado | OCP + DRY | Strategy | | | |
-| `src/Notifications/NotificationSender.php` | `if` por tipo repetido en 3 archivos | OCP + DIP | Factory | | | |
-| `src/Legacy/LegacyNotifier.php` | Clase de terceros modificada + copia y pega | DRY + límites del sistema | Adapter | | | |
-| `src/Reports/ReportGenerator.php` | Banderas booleanas (`boolean trap`) | OCP | Decorator | | | |
-| `src/Events/OrderEvents.php` | Avisos encadenados a clases concretas | DIP | Observer | | | |
-| `src/Services/OrderService.php` | Método que hace de todo | SRP | Facade | | | |
-| `src/Controllers/OrderController.php` | SQL + negocio + HTML juntos | SRP + MVC | MVC | | | |
-| `views/orders.php` | Consulta, calcula y no escapa | MVC + seguridad | MVC | | | |
+| `public/index.php` | Carga manual y rutas con condiciones | Mantenibilidad | Autoload + tabla de rutas | `refactor/bootstrap` | Completar por el grupo | Completar con URL |
+| `config/database.php` | Credenciales locales en el árbol de trabajo | Proceso/seguridad | Configuración fuera de Git + `.gitignore` | `refactor/bootstrap` | Completar por el grupo | Completar con URL |
+| `src/Pricing/PriceCalculator.php` | Cálculo central acoplado a tipos concretos | OCP | Strategy + registro de estrategias | `feat/patron-strategy` | Completar por el grupo | Completar con URL |
+| `src/Notifications/NotificationFactory.php` | La selección de notificación debe estar en un único lugar | OCP | Factory | `feat/patron-factory` | Completar por el grupo | Completar con URL |
+| `src/Events/OrderSubject.php` | Las reacciones no deben estar cableadas dentro del sujeto | DIP/OCP | Observer | `feat/patron-observer` | Completar por el grupo | Completar con URL |
+| `src/Legacy/LegacyNotifierAdapter.php` | Interfaz heredada incompatible con la nueva interfaz | Acoplamiento | Adapter | `feat/patron-adapter` | Completar por el grupo | Completar con URL |
+| `src/Reports/ReportGenerator.php` | Opciones del reporte expresadas con booleanos | Mantenibilidad | Decorator encadenable | `feat/patron-decorator` | Completar por el grupo | Completar con URL |
+| `src/Services/OrderService.php` | Flujo de creación mezclaba muchas tareas | SRP / acoplamiento | Facade | `feat/patron-facade` | Completar por el grupo | Completar con URL |
+| `src/Controllers/OrderController.php` | Controlador con lógica de negocio | SRP / MVC | Delegar en el servicio | `feat/patron-facade` | Completar por el grupo | Completar con URL |
+| `views/orders.php` | La vista calculaba montos y consultaba datos | MVC / XSS | Presentación pura y salida escapada | `feat/patron-facade` | Completar por el grupo | Completar con URL |
+| Revisión de Pull Requests | No había una plantilla que exigiera responder los tres puntos de la consigna | **Deuda de proceso** | Plantilla de PR con deuda, patrón y consecuencia | `docs/tp-integrador` | Completar por el grupo | Completar con URL |
+| Revisión cruzada | El mapa no registraba quién revisó cada cambio | **Deuda de proceso** | Registrar PR, autor, revisor y aprobación real | `docs/tp-integrador` | Completar por el grupo | Completar con URL |
 
-## Referencias
+## Cierre de proceso
 
-- **SRP** — una clase, un motivo de cambio.
-- **OCP** — abierto a extensión, cerrado a modificación.
-- **DIP** — depender de abstracciones, no de implementaciones concretas.
-- **DRY** — el mismo conocimiento no se escribe dos veces.
-
-## Métrica del proyecto
-
-El descuento de obra social (`0.7`) aparece en **5 archivos**.
-Contar cuántos quedan después del refactor: esa diferencia es el trabajo hecho.
+Antes de entregar, reemplazar los marcadores por los integrantes, enlaces a PR y revisores que realmente participaron. No inventar aprobaciones ni PR que no existan.
