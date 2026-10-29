@@ -1,20 +1,18 @@
-# Configuracion local: NUNCA se versiona
+# Configuracion local y credenciales (no versionar)
 /config/database.php
 
-# Dependencias
+# Dependencias y artefactos
 /vendor/
-
-# Entorno
-.env
 *.log
+.phpunit.cache/
 
-# Basura del editor y del sistema
+# Editores y sistema operativo
 .vscode/
 .idea/
 Thumbs.db
 .DS_Store
 
-# Las copias de seguridad a mano son deuda tecnica: para eso esta el historial
+# Copias de seguridad
 *_final.php
 *_v2.php
 *_backup.php
